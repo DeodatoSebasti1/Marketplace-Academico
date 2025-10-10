@@ -4,6 +4,8 @@
 ## Faculdade de Engenharia / Licenciatura em Engenharia Informática  
 ### Unidade Curricular: Projeto de Desenvolvimento Móvel  
 ### Docente: Pedro Rosa  
+###PROTOTIPO: [📄 Ver Protótipo (PDF)](PROTOTIPO%20MERCADO%20ACADEMICO.pdf)
+EOF
 
 ---
 
