@@ -9,8 +9,10 @@ EOF
 
 ---
 
-## 🧑‍💻 Grupo
+#🧑‍💻 Grupo D01-G11
 - **Deodato Sebastião Luzayadio**
+- **Jeovani Antônio**
+- **Jurandi Bendinha**
 
 📍 **Local:** Lisboa  
 📅 **Data:** 05 de Outubro de 2025  
