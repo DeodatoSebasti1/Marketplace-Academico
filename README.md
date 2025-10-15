@@ -11,7 +11,7 @@ EOF
 
 #🧑‍💻 Grupo D01-G11
 - **Deodato Sebastião Luzayadio**
-- **Jeovani Antônio**
+- **Jeovani António**
 - **Jurandi Bendinha**
 
 📍 **Local:** Lisboa  
