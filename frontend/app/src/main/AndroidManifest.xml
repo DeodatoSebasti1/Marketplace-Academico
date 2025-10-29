@@ -26,10 +26,15 @@
             </intent-filter>
         </activity>
 
-    <!-- MainActivity -->
+
+        <!-- MainActivity -->
         <activity
-        android:name=".MainActivity"
-        android:exported="false" />
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <activity android:name=".ui.cadastro.CadastroActivity"
+            android:exported="false" />
+
 
     </application>
 

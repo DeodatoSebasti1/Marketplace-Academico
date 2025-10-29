@@ -1,6 +1,7 @@
 // Caminho do arquivo: /Users/deodatoluzayadio/academicplace/frontend/app/src/main/java/com/example/frontend/ui/login/login.kt
-package com.example.frontend.ui.login // Pacote corrigido para login
+package com.example.frontend.ui.login
 
+import android.content.Intent // <-- ADICIONADO: Para usar a classe Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext // <-- ADICIONADO: Para obter o 'context'
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -23,6 +25,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.frontend.R
+import com.example.frontend.ui.cadastro.CadastroActivity // <-- ADICIONADO: Para encontrar sua tela de cadastro
 import com.example.frontend.ui.theme.FrontendTheme
 import com.example.frontend.ui.theme.Vermelho
 
@@ -31,7 +34,7 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FrontendTheme {
-                LoginScreen() // Chamando a tela de Login
+                LoginScreen()
             }
         }
     }
@@ -50,11 +53,14 @@ fun LoginScreen() {
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
 
+    // <-- ADICIONADO: A variável 'context' é declarada aqui
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(horizontal = 32.dp), // Adiciona espaçamento nas laterais
+            .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -73,7 +79,7 @@ fun LoginScreen() {
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth() // Ocupa a largura disponível (com padding da Column)
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -117,7 +123,11 @@ fun LoginScreen() {
         // Texto para cadastro
         ClickableText(
             text = AnnotatedString("Não tem uma conta? Cadastre-se"),
-            onClick = { /* TODO: Navegar para a tela de cadastro */ },
+            onClick = {
+                // Agora 'Intent', 'context' e 'CadastroActivity' são reconhecidos e o erro some!
+                val intent = Intent(context, CadastroActivity::class.java)
+                context.startActivity(intent)
+            },
             style = TextStyle(
                 color = Vermelho,
                 textAlign = TextAlign.Center
@@ -126,3 +136,4 @@ fun LoginScreen() {
         )
     }
 }
+
