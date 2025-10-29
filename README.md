@@ -4,8 +4,7 @@
 ## Faculdade de Engenharia / Licenciatura em Engenharia Informática  
 ### Unidade Curricular: Projeto de Desenvolvimento Móvel  
 ### Docente: Pedro Rosa  
-###PROTOTIPO: [📄 Ver Protótipo (PDF)](PROTOTIPO%20MERCADO%20ACADEMICO.pdf)
-EOF
+###PROTOTIPO FIGMA: https://www.figma.com/proto/jAdwZAnjQbi05DygAsjtz5/PROTOTIPO-MERCADO-ACADEMICO?node-id=0-1&t=SjjzxkPePQZK1Gzl-1
 
 ---
 
@@ -14,20 +13,13 @@ EOF
 - **Jeovani António**
 - **Jurandi Bendinha**
 
-📍 **Local:** Lisboa  
-📅 **Data:** 05 de Outubro de 2025  
-
+📍 **Local:** Lisboa 
 ---
 
 ## 🧾 Nome do Projeto
 # **Marketplace Académico**
 
 📂 **Repositório GitHub:** [https://github.com/DeodatoSebasti1/Marketplace-Academico](https://github.com/DeodatoSebasti1/Marketplace-Academico)
-
-📄 **Versão PDF do Relatório:**  
-O relatório completo em formato PDF encontra-se disponível no diretório do projeto sob o nome:  
-`RELATORIO_OFFICIAL_RETIFICADO.pdf`
-
 ---
 
 ## 🔑 Palavras-Chave
@@ -41,11 +33,13 @@ O relatório completo em formato PDF encontra-se disponível no diretório do pr
 
 ## 📱 Breve Descrição da Aplicação e Problema que Pretende Resolver
 
-O **Marketplace Académico** é uma aplicação móvel para Android que permite a estudantes, docentes e funcionários de instituições académicas comprar e vender produtos ou serviços de forma simples, rápida e segura.
+Os estudantes universitários, docentes e funcionários enfrentam dificuldades na compra e venda de produtos e serviços dentro do ambiente académico. Atualmente, esses processos ocorrem de forma desorganizada, usando:
 
-Os estudantes enfrentam frequentemente dificuldades para comercializar materiais ou serviços dentro do ambiente universitário, recorrendo a plataformas dispersas como grupos de WhatsApp ou murais físicos. Estas soluções apresentam problemas de desorganização, falta de confiança e ausência de mecanismos de pesquisa e filtragem.
+-Grupos de WhatsApp ou murais físicos, que são dispersos e pouco confiáveis.
+-Falta de mecanismos de pesquisa e filtragem, dificultando encontrar exatamente o que precisam.
+-Risco de fraudes ou má comunicação entre comprador e vendedor, pois não há um ambiente seguro e exclusivo para a comunidade académica.
 
-O projeto propõe uma **plataforma centralizada e exclusiva para a comunidade académica**, que garante um ambiente confiável e intuitivo para troca de bens e serviços.
+Isso gera perda de tempo, insegurança e frustração para quem quer vender ou comprar materiais e serviços relacionados à vida universitária.
 
 ---
 
