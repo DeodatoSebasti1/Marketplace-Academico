@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Backend (Java/Maven/Spring Boot)
+backend/target/
+backend/.mvn/
+backend/*.log
+backend/mvnw
+backend/mvnw.cmd
+backend/.vscode/
+
+# Frontend (Android/Kotlin/Gradle)
+frontend/.gradle/
+frontend/.idea/
+frontend/local.properties
+frontend/build/
+frontend/app/build/
+frontend/captures/
+frontend/*.apk
+frontend/*.aab
+frontend/.externalNativeBuild/
+frontend/.cxx/
+frontend/gradle/
+
+# Segurança
+*.env
+**/application-local.properties
+**/local.properties
+
+# Logs
+*.log
+logs/
