@@ -4,8 +4,8 @@
 ## Faculdade de Engenharia / Licenciatura em Engenharia Informática  
 ### Unidade Curricular: Projeto de Desenvolvimento Móvel  
 ### Docente: Pedro Rosa  
-##### PROTOTIPO FIGMA: https://www.figma.com/proto/jAdwZAnjQbi05DygAsjtz5/PROTOTIPO-MERCADO-ACADEMICO?node-id=0-1&t=SjjzxkPePQZK1Gzl-1
-
+##### FIGMA: https://www.figma.com/proto/jAdwZAnjQbi05DygAsjtz5/PROTOTIPO-MERCADO-ACADEMICO?node-id=0-1&t=SjjzxkPePQZK1Gzl-1
+##### ClickUp: https://app.clickup.com/90151726092/v/s/90157139983
 ---
 
 #🧑‍💻 Grupo D01-G11
