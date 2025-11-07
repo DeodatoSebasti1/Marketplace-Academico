@@ -1,53 +1,48 @@
+// CAMINHO: app/src/main/java/com/example/frontend/ui/theme/Theme.kt
+
 package com.example.frontend.ui.theme
 
-import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Paleta de cores para o modo escuro
+private val DarkColorScheme = lightColorScheme(
+    primary = Vermelho,
+    background = Color.White,
+    surface = Color.White,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Vermelho,           // Cor principal (botões, ícones focados, etc.)
+    onPrimary = Color.White,         // Cor do texto/ícone sobre a cor primária (Ex: texto do botão)
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = Color.White,        // Cor de fundo principal dos ecrãs
+    surface = Color.White,           // Cor da superfície de componentes como Cards
+
+    // Cores para texto e ícones sobre o fundo branco
+    onBackground = Color.Black,      // Cor do texto sobre o fundo branco
+    onSurface = Color.Black          // Cor do texto sobre superfícies brancas
 )
 
 @Composable
 fun FrontendTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // darkTheme: Boolean = isSystemInDarkTheme(), // <- Removido para forçar tema claro
+    dynamicColor: Boolean = false, // <- Desativado para usar sempre nosso tema
     content: @Composable () -> Unit
 ) {
+    // 2. LÓGICA SIMPLIFICADA PARA USAR SEMPRE O TEMA CLARO
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            dynamicLightColorScheme(context) // Permite cores dinâmicas se o utilizador quiser
         }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> LightColorScheme // Nosso tema padrão
     }
 
     MaterialTheme(
