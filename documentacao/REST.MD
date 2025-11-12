@@ -3,10 +3,11 @@
 
 # 📘 API REST – Marketplace Académico
 
-**Autor:** Deodato Sebastião Luzayadio  
+**Autor:** Deodato Sebastião Luzayadio, Jurandi Bendinha, Jeovani Antonio  
 **Curso:** Engenharia Informática  
 **Projeto:** Marketplace Académico  
 **Tecnologias:** Spring Boot · MySQL · Kotlin · Retrofit · Jetpack Compose  
+
 
 ---
 
@@ -295,19 +296,3 @@ http://localhost:8080/swagger-ui.html
 
 ---
 
-## ✍️ Autor
-
-**Deodato Sebastião Luzayadio**
-📍 Estudante Internacional – Portugal
-📚 Curso: Engenharia Informática
-🎓 Projeto: *Marketplace Académico*
-
-```
-
----
-
-💡 **Dica:**  
-Depois de colar isso no GitHub, ele renderiza automaticamente com cores e formatação.  
-Se quiser, posso gerar a **versão com exemplos Retrofit (Android)** logo abaixo para complementar a documentação técnica.  
-Queres que eu adicione essa parte também?
-```
