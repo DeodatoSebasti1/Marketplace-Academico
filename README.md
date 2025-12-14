@@ -6,6 +6,7 @@ Docente: Pedro Rosa
 
 Repositório:  
 https://github.com/DeodatoSebasti1/Marketplace-Academico  
+
 ClickUp: 
 https://app.clickup.com/90151726092/v/o/f/901510316525?pr=90157139983
 
