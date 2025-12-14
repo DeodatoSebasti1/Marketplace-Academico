@@ -166,16 +166,11 @@ O documento completo encontra-se disponível no repositório.
 
 A documentação REST descreve todos os endpoints da API, incluindo métodos, parâmetros e respostas.
 
-Link:  
-https://github.com/DeodatoSebasti1/Marketplace-Academico/blob/main/documentacao/REST.MD  
-
 ---
 
 ## Manual do Utilizador
 
 O Manual do Utilizador descreve passo a passo a utilização da aplicação, desde o registo até à realização de compras, incluindo capturas de ecrã.
-
-O manual completo encontra-se disponível no repositório GitHub.
 
 ---
 
@@ -183,10 +178,6 @@ O manual completo encontra-se disponível no repositório GitHub.
 
 O projeto foi desenvolvido ao longo do semestre, seguindo uma abordagem incremental.  
 As tarefas foram distribuídas entre os elementos do grupo e ajustadas conforme a evolução do projeto.
-
-Link:  
-https://github.com/DeodatoSebasti1/Marketplace-Academico/blob/main/documentacao/graficoGantt.md  
-
 ---
 
 ## Mudanças Implementadas
