@@ -1,251 +1,234 @@
-# Mercado Académico
+# Marketplace Académico
 
-**Universidade Europeia – IADE**  
-Faculdade de Engenharia  
-Licenciatura em Engenharia Informática  
+Licenciatura em Engenharia Informática | LEIF003D02 | 2025–2026  
+Unidade Curricular: Projeto de Desenvolvimento Móvel  
+Docente: Pedro Rosa  
 
-**Unidade Curricular:** Projeto de Desenvolvimento Móvel  
-**Docente:** Pedro Rosa  
+Repositório:  
+https://github.com/DeodatoSebasti1/Marketplace-Academico  
 
+Grupo: G11 – Marketplace Académico  
 
----
+Autores:  
+- Deodato Sebastião Luzayadio  
+- Jeovani António  
+- Jurandi Bendinha  
 
-## Grupo D01-G11
-
-- **Deodato Sebastião Luzayadio**  
-- **Jeovani António**  
-- **Jurandi Bendinha**  
-
-**Local:** Lisboa  
-Ultima Atualização do Relatorio: **14 dezembro 2025**
+Local: Lisboa  
+Data: 14 de dezembro de 2025  
 
 ---
 
-## Ligações Importantes
+## Índice
 
-- **Figma (Protótipo):**  
-  https://www.figma.com/proto/jAdwZAnjQbi05DygAsjtz5/PROTOTIPO-MERCADO-ACADEMICO?node-id=0-1&t=SjjzxkPePQZK1Gzl-1  
-
-- **ClickUp (Gestão do Projeto):**  
-  https://app.clickup.com/90151726092/v/s/90157139983  
-
-- **Repositório GitHub:**  
-  https://github.com/DeodatoSebasti1/Marketplace-Academico  
-
----
-
-##  Nome do Projeto
-
-**Mercado Académico**
-
----
-
-## Palavras-Chave
-
-- Mercado  
-- Aplicativo móvel  
-- Estudantes universitários  
-- Compra e venda  
-- Serviços académicos  
+1. [Introdução](#introdução)  
+2. [Objetivos](#objetivos)  
+   1. [Objetivo Geral](#objetivo-geral)  
+   2. [Objetivos Específicos](#objetivos-específicos)  
+3. [Público-Alvo](#público-alvo)  
+4. [Pesquisa de Mercado](#pesquisa-de-mercado)  
+5. [Descrição da Solução Implementada](#descrição-da-solução-implementada)  
+   1. [Descrição Geral da Solução](#descrição-geral-da-solução)  
+   2. [Enquadramento nas Unidades Curriculares](#enquadramento-nas-unidades-curriculares)  
+6. [Requisitos Técnicos](#requisitos-técnicos)  
+7. [Arquitetura da Solução](#arquitetura-da-solução)  
+8. [Tecnologias Utilizadas](#tecnologias-utilizadas)  
+9. [Diagrama de Classes](#diagrama-de-classes)  
+10. [Dicionário de Dados](#dicionário-de-dados)  
+11. [Documentação REST](#documentação-rest)  
+12. [Manual do Utilizador](#manual-do-utilizador)  
+13. [Planeamento e Calendarização](#planeamento-e-calendarização)  
+14. [Mudanças Implementadas](#mudanças-implementadas)  
+15. [Quadro de Contribuições](#quadro-de-contribuições)  
+16. [Conclusão](#conclusão)  
+17. [Referências](#referências)  
 
 ---
 
-## Descrição da Aplicação e Problema a Resolver
+## Introdução
 
-Os estudantes universitários, docentes e funcionários enfrentam dificuldades na compra e venda de produtos e serviços dentro do ambiente académico. Atualmente, esses processos ocorrem de forma desorganizada, recorrendo a:
+No âmbito da unidade curricular de Projeto de Desenvolvimento Móvel, foi desenvolvido o projeto **Marketplace Académico**, uma aplicação móvel destinada à compra e venda de materiais académicos entre estudantes.
 
-- Grupos de WhatsApp ou murais físicos, que são dispersos e pouco confiáveis;  
-- Ausência de mecanismos eficazes de pesquisa e filtragem;  
-- Risco de fraudes e má comunicação entre comprador e vendedor, devido à inexistência de um ambiente seguro e exclusivo.
+Este projeto surge como resposta a uma necessidade real identificada no contexto universitário, onde muitos estudantes possuem materiais que já não utilizam, enquanto outros procuram alternativas mais económicas para adquirir esses mesmos recursos.
 
-Esses fatores resultam em perda de tempo, insegurança e frustração para os utilizadores.
-
-O **Marketplace Académico** surge como uma solução centralizada, segura e dedicada à comunidade universitária.
+Ao longo do semestre, o projeto foi evoluindo de forma incremental, permitindo a aplicação prática de conhecimentos adquiridos em programação, bases de dados, desenvolvimento mobile e organização de software.
 
 ---
 
-## Objetivos e Motivação
+## Objetivos
 
 ### Objetivo Geral
 
-Desenvolver uma aplicação móvel de marketplace direcionada à comunidade académica, integrando um backend em **Java (Spring Boot)** e um frontend em **Kotlin (Jetpack Compose)**, aplicando os princípios de **MVC, REST e MVVM**.
+Desenvolver uma aplicação móvel funcional e intuitiva que permita a compra e venda de produtos académicos entre membros da comunidade universitária, recorrendo a uma arquitetura cliente-servidor baseada em API REST.
 
 ### Objetivos Específicos
 
-- Implementar autenticação e gestão de utilizadores;  
-- Permitir criação, edição e remoção de anúncios;  
-- Disponibilizar listagem de produtos e serviços com filtros;  
-- Criar sistema de comunicação (chat) entre comprador e vendedor;  
-- Garantir interface responsiva e navegação intuitiva.  
-
-### Motivação
-
-Promover a economia colaborativa entre estudantes, incentivar a reutilização de materiais académicos e aplicar, na prática, os conhecimentos adquiridos nas unidades curriculares de **Programação Móvel** e **Programação Orientada a Objetos**.
+- Criar um sistema de publicação e pesquisa de produtos académicos;  
+- Permitir a negociação entre utilizadores através de propostas;  
+- Registar o histórico de compras e vendas;  
+- Integrar um sistema de pagamentos online;  
 
 ---
 
 ## Público-Alvo
 
-A aplicação destina-se principalmente a:
+O público-alvo da aplicação é constituído maioritariamente por estudantes do ensino superior, com idades entre os 18 e os 30 anos.
 
-- Estudantes universitários;  
-- Docentes;  
-- Funcionários académicos.  
-
-**Características principais:**
-
-- Utilização predominante via smartphone;  
-- Preferência por soluções rápidas, simples e seguras;  
-- Interesse na compra e venda de produtos usados e serviços académicos.
+Os utilizadores possuem conhecimentos básicos de tecnologia, utilizam frequentemente dispositivos móveis e demonstram interesse na compra e venda de materiais académicos a preços acessíveis.
 
 ---
 
 ## Pesquisa de Mercado
 
-Foram analisadas aplicações de marketplace amplamente utilizadas:
+Foram analisadas plataformas existentes como OLX, Facebook Marketplace e Vinted. Apesar de permitirem a compra e venda de produtos, estas plataformas são genéricas e não oferecem funcionalidades específicas para o contexto académico.
 
-| Aplicação | Descrição | Limitações |
-|---------|----------|-----------|
-| OLX | Marketplace generalista | Não é focado no contexto académico |
-| Facebook Marketplace | Grande base de utilizadores e chat integrado | Falta de controlo e problemas de confiança |
-| Vinted | Segurança reforçada | Público restrito e foco em moda |
-| AliExpress | Pesquisa avançada | Comércio global, não local |
-| eBay | Sistema de leilões | Complexidade excessiva |
-
-O **Marketplace Académico** diferencia-se por ser restrito à comunidade universitária, oferecendo maior confiança, segurança e adequação ao contexto académico.
+O Marketplace Académico diferencia-se por ser direcionado exclusivamente à comunidade universitária, oferecendo funcionalidades como propostas de negociação, mensagens associadas a produtos e histórico de transações.
 
 ---
 
-## Guiões de Teste 
+## Descrição da Solução Implementada
 
-### UC1 – Criar Anúncio e Contactar Vendedor
+### Descrição Geral da Solução
 
-**Ator:** Vendedor e Comprador  
+A solução implementada consiste numa aplicação Android baseada numa arquitetura cliente-servidor. O frontend móvel comunica com um backend através de uma API REST, permitindo a gestão de utilizadores, produtos, categorias, propostas, mensagens e transações.
 
-1. O vendedor acede ao feed e seleciona “+ Criar Anúncio”;  
-2. Preenche título, descrição, preço e imagens;  
-3. Publica o anúncio;  
-4. O comprador visualiza o anúncio e inicia contacto via chat.  
+### Enquadramento nas Unidades Curriculares
 
-**Resultado Esperado:**  
-Anúncio publicado com sucesso e canal de comunicação ativo.
+O projeto integrou conhecimentos das seguintes unidades curriculares:
 
----
-
-### UC2 – Pesquisar e Filtrar Anúncios
-
-**Ator:** Comprador  
-
-1. Pesquisa por “Livro de Cálculo”;  
-2. Aplica filtros por categoria e intervalo de preço;  
-3. Adiciona anúncio aos favoritos.  
-
-**Resultado Esperado:**  
-Lista filtrada corretamente e item favoritado.
+- Programação Orientada a Objetos: modelação das entidades e estrutura do backend;  
+- Programação de Dispositivos Móveis: desenvolvimento da aplicação Android;  
+- Matemática Discreta: definição de regras lógicas e estados do sistema;  
+- Competências Comunicacionais: elaboração da documentação técnica.  
 
 ---
 
-### UC3 – Editar e Excluir Anúncio
+## Requisitos Técnicos
 
-**Ator:** Vendedor  
+Para o desenvolvimento do projeto foram utilizados:
 
-1. Acede a “Meus Anúncios”;  
-2. Edita preço e descrição;  
-3. Guarda alterações;  
-4. Remove o anúncio.  
-
-**Resultado Esperado:**  
-Anúncio atualizado e posteriormente removido do feed.
-
----
-
-## Descrição da Solução
-
-### i. Descrição Geral
-
-A solução é composta por:
-
-- Backend REST desenvolvido em **Java com Spring Boot**;  
-- Aplicação Android desenvolvida em **Kotlin com Jetpack Compose**;  
-- Comunicação via **JSON sobre HTTPS**.
+- Android Studio;  
+- Linguagem Kotlin;  
+- Jetpack Compose;  
+- Base de dados relacional MySQL;  
+- API REST;  
+- Integração com Stripe para pagamentos;  
+- Integração com Brevo para envio de emails;  
+- Ligação à internet.  
 
 ---
 
-### ii. Enquadramento nas Unidades Curriculares
+## Arquitetura da Solução
 
-| Unidade Curricular | Aplicação no Projeto |
-|-------------------|---------------------|
-| Programação Orientada a Objetos | Backend em Java com Spring Boot |
-| Programação Móvel | App Android com Kotlin e Compose |
-| Engenharia de Software | Padrões MVC, MVVM e REST |
-| Bases de Dados | Modelação e integração com MySQL |
-| IHC / UX Design | Interface intuitiva e usável |
+A arquitetura adotada segue o modelo cliente-servidor.  
+O frontend móvel é responsável pela interface e interação com o utilizador, enquanto o backend gere a lógica de negócio e a persistência de dados.
+
+A comunicação é realizada através de pedidos HTTP para uma API REST, utilizando o formato JSON.
 
 ---
 
-### iii. Requisitos Técnicos
+## Tecnologias Utilizadas
 
-**Backend:**
-- Java 17  
-- Spring Boot (MVC + REST)  
-- Spring Data JPA  
-- MySQL  
-- Spring Security + JWT  
-- Maven  
-
-**Frontend:**
 - Kotlin  
-- Jetpack Compose (Material 3)  
+- Android Jetpack Compose  
+- MySQL  
+- Spring Boot  
+- API REST  
 - Retrofit  
-- Coil  
-- Hilt  
-- Arquitetura MVVM  
-
-**Outros:**
-- GitHub  
-- Figma  
-- Draw.io  
+- Stripe API  
 
 ---
 
-### iv. Arquitetura da Solução
+## Diagrama de Classes
 
-Arquitetura cliente-servidor baseada em API REST, separando claramente frontend, backend e persistência de dados.
+O diagrama de classes representa as principais entidades do sistema, nomeadamente Utilizador, Produto, Categoria, Proposta e Mensagem, bem como as relações entre elas.
+
+O diagrama completo encontra-se disponível no repositório GitHub.
+
+---
+
+## Dicionário de Dados
+
+O dicionário de dados descreve as entidades da base de dados, os seus atributos e tipos de dados.  
+As principais tabelas incluem utilizadores, produtos, categorias, propostas e mensagens.
+
+O documento completo encontra-se disponível no repositório.
+
+---
+
+## Documentação REST
+
+A documentação REST descreve todos os endpoints da API, incluindo métodos, parâmetros e respostas.
+
+Link:  
+https://github.com/DeodatoSebasti1/Marketplace-Academico/blob/main/documentacao/REST.MD  
+
+---
+
+## Manual do Utilizador
+
+O Manual do Utilizador descreve passo a passo a utilização da aplicação, desde o registo até à realização de compras, incluindo capturas de ecrã.
+
+O manual completo encontra-se disponível no repositório GitHub.
+
+---
+
+## Planeamento e Calendarização
+
+O projeto foi desenvolvido ao longo do semestre, seguindo uma abordagem incremental.  
+As tarefas foram distribuídas entre os elementos do grupo e ajustadas conforme a evolução do projeto.
+
+Link:  
+https://github.com/DeodatoSebasti1/Marketplace-Academico/blob/main/documentacao/graficoGantt.md  
+
+---
+
+## Mudanças Implementadas
+
+Algumas funcionalidades previstas inicialmente, como a utilização de localização geográfica, não foram implementadas devido a limitações técnicas e de tempo.
+
+Por outro lado, foram adicionadas funcionalidades como o sistema de propostas, mensagens internas, histórico de compras e vendas e integração de pagamentos através da Stripe API.
+
+---
+
+## Quadro de Contribuições
+
+O projeto foi desenvolvido de forma colaborativa, sendo coordenado por **Deodato Sebastião Luzayadio**, que assumiu a maior responsabilidade técnica.
+
+| Tarefa | Deodato | Jurandi | Jeovani |
+|------|--------|--------|--------|
+| Análise e requisitos | 60% | 20% | 20% |
+| Planeamento | 60% | 20% | 20% |
+| Base de dados | 70% | 15% | 15% |
+| Backend | 70% | 15% | 15% |
+| Frontend | 70% | 15% | 15% |
+| Integração | 65% | 20% | 15% |
+| Testes | 60% | 20% | 20% |
+| Documentação | 80% | 10% | 10% |
 
 ---
 
 ## Conclusão
 
-O **Marketplace Académico** apresenta uma solução moderna, segura e eficiente para a compra e venda de produtos e serviços no contexto universitário.
+O desenvolvimento do projeto Marketplace Académico permitiu aplicar, de forma prática, os conhecimentos adquiridos ao longo do curso.
 
-O projeto integra tecnologias atuais, respeita boas práticas de engenharia de software e consolida conhecimentos adquiridos ao longo do curso, nomeadamente em **Programação Móvel**, **Programação Orientada a Objetos** e **Arquitetura de Software**.
+Apesar das dificuldades encontradas, o resultado final cumpre os objetivos definidos e apresenta potencial para futuras melhorias e expansão de funcionalidades.
 
 ---
 
 ## Referências
 
-- Android Developers. (2025). *Official Documentation*. Google.  
-  https://developer.android.com/docs  
+Android Developers. (2025). Android Developers: Official Documentation.  
+https://developer.android.com/docs  
 
-- Sommerville, I. (2016). *Software Engineering* (10th ed.). Pearson.  
+Nielsen, J., & Budiu, R. (2012). Mobile usability. New Riders.  
 
-- Pressman, R. S., & Maxim, B. R. (2014). *Software Engineering: A Practitioner’s Approach* (8th ed.). McGraw-Hill.  
+Sommerville, I. (2016). Software Engineering (10th ed.). Pearson.  
 
-- Nielsen, J. (1994). *Usability Engineering*. Morgan Kaufmann.  
+Pressman, R. S., & Maxim, B. R. (2014). Software Engineering: A Practitioner’s Approach. McGraw-Hill.  
 
-- OLX Portugal. (2025). https://www.olx.pt  
-- Vinted. (2025). https://www.vinted.com  
-- Facebook Marketplace. (2025). https://www.facebook.com/marketplace  
+Vinted. (2025). https://www.vinted.com  
 
----
+OLX, Wallapop.
 
-## Nota Final
-
-Este documento em **Markdown** representa a versão digital do relatório académico.  
-A versão **PDF** deve ser gerada a partir deste conteúdo e submetida no **Canvas**, conforme as instruções do docente.
-
-
-🧾 **Nota:**  
-Este documento em Markdown é a versão digital do relatório académico.  
-A versão PDF atualizada deve ser anexada ao repositório e submetida no **Canvas** conforme as instruções do docente.
 
