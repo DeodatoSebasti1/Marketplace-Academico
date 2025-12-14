@@ -35,7 +35,7 @@ Após este processo, a conta fica ativa e pronta a ser utilizada.
 
 Depois de concluído o registo, o utilizador pode iniciar sessão na aplicação.
 
-![Ecrã de Login](imagens/login.png)
+<img src="imagens/login.png" alt="Página Inicial" width="300"/>
 
 ### Para iniciar sessão:
 1. Introduzir o email;
