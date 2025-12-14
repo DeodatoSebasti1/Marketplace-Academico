@@ -8,6 +8,7 @@ Repositório:
 https://github.com/DeodatoSebasti1/Marketplace-Academico  
 ClickUp: 
 https://app.clickup.com/90151726092/v/o/f/901510316525?pr=90157139983
+
 Figma:
 https://www.figma.com/design/jAdwZAnjQbi05DygAsjtz5/PROTOTIPO-MERCADO-ACADEMICO?node-id=0-1&t=ynvgXQTczBW1MuJ8-1
 
