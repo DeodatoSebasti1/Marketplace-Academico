@@ -1,298 +1,466 @@
 
+---
 
+# Documentação REST API – Mercado Académico
 
-# 📘 API REST – Marketplace Académico
+API REST para o sistema **Mercado Académico**, responsável pela gestão de utilizadores, produtos, categorias, favoritos, propostas, compras, uploads e pagamentos.
 
-**Autor:** Deodato Sebastião Luzayadio, Jurandi Bendinha, Jeovani Antonio  
-**Curso:** Engenharia Informática  
-**Projeto:** Marketplace Académico  
-**Tecnologias:** Spring Boot · MySQL · Kotlin · Retrofit · Jetpack Compose  
-
+**Versão:** 1.0.0
+**Última atualização:** Dezembro 2025
 
 ---
 
-## 🌍 Base URL
+## Índice
 
-```bash
-http://localhost:8080/api
-````
-
-> 💡 No Android Emulator:
-> `http://10.0.2.2:8080/api`
+1. Introdução
+2. Autenticação
+3. Utilizadores
+4. Produtos
+5. Categorias
+6. Favoritos
+7. Propostas
+8. Compras
+9. Upload de Imagens
+10. Pagamentos
+11. Códigos de Resposta
 
 ---
 
-## 🧩 Entidade Principal: Produto
+## 1. Introdução
 
-### Estrutura JSON
+A API Mercado Académico segue o estilo arquitetural REST e comunica através de JSON.
+Alguns endpoints requerem autenticação via **JWT (JSON Web Token)**.
+
+### Base URL (Android Emulator)
+
+```
+http://10.0.2.2:8080/api
+```
+
+---
+
+## 2. Autenticação
+
+### 2.1 Login
+
+**Endpoint**
+
+```
+POST /login
+```
+
+**Headers**
+
+```
+Content-Type: application/json
+```
+
+**Body**
 
 ```json
 {
-  "idProduto": 1,
-  "usuario": {
-    "id": 1,
-    "nome": "Deodato Sebastião Luzayadio",
-    "email": "deolastro@gmail.com"
-  },
-  "nome": "Livro de Redes",
-  "titulo": "Livro de Redes",
-  "descricao": "Livro usado, em bom estado",
-  "preco": 12.50,
-  "categoria": "Material Escolar",
-  "imagens": "foto123.jpg,foto456.jpg",
-  "criadoEm": "2025-11-12T00:00:00"
+  "email": "utilizador@email.com",
+  "senhaHash": "password"
+}
+```
+
+**Resposta (200 OK)**
+
+```json
+{
+  "id": 2,
+  "nome": "Utilizador",
+  "email": "utilizador@email.com",
+  "token": "jwt-token"
 }
 ```
 
 ---
 
-## 🚀 Endpoints da API
+## 3. Utilizadores
 
-### 1️⃣ Criar Produto
+### 3.1 Registar Utilizador
 
-**POST** `/produtos`
+**Endpoint**
 
-#### Request Body
-
-```json
-{
-  "usuario": { "id": 1 },
-  "nome": "Livro de Redes",
-  "titulo": "Livro de Redes",
-  "descricao": "Usado mas em bom estado",
-  "preco": 12.5,
-  "categoria": "Material Escolar",
-  "imagens": "foto123.jpg,foto456.jpg"
-}
+```
+POST /usuarios/cadastrar
 ```
 
-#### Response 200 OK
+**Body**
 
 ```json
 {
-  "message": "Produto criado com sucesso!"
-}
-```
-
-#### Response 400 Bad Request
-
-```json
-{
-  "error": "Usuário não encontrado"
+  "nome": "Nome",
+  "email": "email@email.com",
+  "telefone": "912345678",
+  "senhaHash": "password"
 }
 ```
 
 ---
 
-### 2️⃣ Listar Todos os Produtos
+### 3.2 Obter Perfil Autenticado
 
-**GET** `/produtos`
+**Endpoint**
 
-#### Response 200 OK
+```
+GET /usuarios/perfil
+```
+
+**Headers**
+
+```
+Authorization: Bearer <token>
+```
+
+**Resposta (200 OK)**
+
+```json
+{
+  "id": 2,
+  "nome": "Utilizador",
+  "email": "email@email.com",
+  "telefone": "912345678",
+  "fotoPerfil": "url_imagem"
+}
+```
+
+---
+
+### 3.3 Editar Perfil
+
+**Endpoint**
+
+```
+PUT /usuarios/editar
+```
+
+**Headers**
+
+```
+Authorization: Bearer <token>
+```
+
+**Body**
+
+```json
+{
+  "nome": "Novo Nome",
+  "telefone": "987654321",
+  "fotoPerfil": "url_imagem"
+}
+```
+
+---
+
+## 4. Produtos
+
+### 4.1 Criar Produto
+
+**Endpoint**
+
+```
+POST /produtos
+```
+
+**Body**
+
+```json
+{
+  "usuario": { "id": 2 },
+  "nome": "Livro",
+  "titulo": "Livro de Matemática",
+  "descricao": "Livro em bom estado",
+  "preco": 10.0,
+  "categoria": { "idCategoria": 1 },
+  "imagens": "img1.jpg,img2.jpg"
+}
+```
+
+---
+
+### 4.2 Listar Produtos
+
+**Endpoint**
+
+```
+GET /produtos
+```
+
+**Resposta (200 OK)**
 
 ```json
 [
   {
     "idProduto": 1,
-    "usuario": { "id": 1, "nome": "Deodato", "email": "deolastro@gmail.com" },
-    "nome": "Livro de Redes",
-    "titulo": "Livro de Redes",
-    "descricao": "Usado mas em bom estado",
-    "preco": 12.5,
-    "categoria": "Material Escolar",
-    "imagens": "foto123.jpg"
-  },
-  {
-    "idProduto": 2,
-    "usuario": { "id": 1, "nome": "Deodato", "email": "deolastro@gmail.com" },
-    "nome": "Calculadora",
-    "titulo": "Calculadora Científica",
-    "descricao": "TI-84 Plus",
-    "preco": 25.0,
-    "categoria": "Tecnologia e Acessórios",
-    "imagens": "calc.jpg"
+    "titulo": "Livro de Matemática",
+    "preco": 10.0,
+    "status": "DISPONIVEL"
   }
 ]
 ```
 
 ---
 
-### 3️⃣ Buscar Produto por ID
+### 4.3 Obter Produto por ID
 
-**GET** `/produtos/{id}`
+**Endpoint**
 
-#### Exemplo
-
-```bash
-GET /produtos/1
+```
+GET /produtos/{id}
 ```
 
-#### Response 200 OK
+---
+
+### 4.4 Atualizar Produto
+
+**Endpoint**
+
+```
+PUT /produtos/{id}
+```
+
+**Body**
 
 ```json
 {
-  "idProduto": 1,
-  "usuario": { "id": 1, "nome": "Deodato", "email": "deolastro@gmail.com" },
-  "nome": "Livro de Redes",
-  "titulo": "Livro de Redes",
-  "descricao": "Usado mas em bom estado",
-  "preco": 12.5,
-  "categoria": "Material Escolar",
-  "imagens": "foto123.jpg"
-}
-```
-
-#### Response 404 Not Found
-
-```json
-{
-  "error": "Produto não encontrado"
+  "titulo": "Novo título",
+  "descricao": "Nova descrição",
+  "preco": 12.0,
+  "categoria": { "idCategoria": 2 }
 }
 ```
 
 ---
 
-### 4️⃣ Upload de Imagem
+### 4.5 Eliminar Produto
 
-**POST** `/uploads`
+**Endpoint**
 
-#### Tipo de envio
-
-`multipart/form-data`
-
-#### Parâmetros
-
-| Campo  | Tipo            | Obrigatório | Descrição         |
-| ------ | --------------- | ----------- | ----------------- |
-| `file` | `MultipartFile` | ✅           | Arquivo de imagem |
-
-#### Response 200 OK
-
-```text
-http://localhost:8080/uploads/img_1731420348293.jpg
+```
+DELETE /produtos/{id}
 ```
 
-#### Response 500 Internal Server Error
+---
+
+## 5. Categorias
+
+### 5.1 Listar Categorias
+
+**Endpoint**
+
+```
+GET /categorias
+```
+
+**Resposta (200 OK)**
+
+```json
+[
+  { "idCategoria": 1, "nome": "Livros" },
+  { "idCategoria": 2, "nome": "Tecnologia" }
+]
+```
+
+---
+
+## 6. Favoritos
+
+### 6.1 Adicionar Favorito
+
+**Endpoint**
+
+```
+POST /favoritos/{userId}/{produtoId}
+```
+
+---
+
+### 6.2 Remover Favorito
+
+**Endpoint**
+
+```
+DELETE /favoritos/{userId}/{produtoId}
+```
+
+---
+
+## 7. Propostas
+
+### 7.1 Enviar Proposta
+
+**Endpoint**
+
+```
+POST /propostas/enviar
+```
+
+**Parâmetros**
+
+```
+produtoId
+compradorId
+valor
+```
+
+---
+
+### 7.2 Listar Propostas como Comprador
+
+**Endpoint**
+
+```
+GET /propostas/comprador/{id}
+```
+
+---
+
+### 7.3 Listar Propostas como Vendedor
+
+**Endpoint**
+
+```
+GET /propostas/vendedor/{id}
+```
+
+---
+
+### 7.4 Aceitar Proposta
+
+**Endpoint**
+
+```
+PUT /propostas/{id}/aceitar
+```
+
+---
+
+### 7.5 Recusar Proposta
+
+**Endpoint**
+
+```
+PUT /propostas/{id}/recusar
+```
+
+---
+
+### 7.6 Contraproposta
+
+**Endpoint**
+
+```
+PUT /propostas/{id}/contrapropor
+```
+
+---
+
+## 8. Compras
+
+### 8.1 Minhas Compras
+
+**Endpoint**
+
+```
+GET /compras
+```
+
+**Headers**
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### 8.2 Minhas Vendas
+
+**Endpoint**
+
+```
+GET /compras/vendas
+```
+
+**Headers**
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 9. Upload de Imagens
+
+### 9.1 Upload
+
+**Endpoint**
+
+```
+POST /uploads
+```
+
+**Form Data**
+
+```
+file: imagem
+```
+
+**Resposta**
 
 ```json
 {
-  "error": "Erro ao salvar arquivo: Permissão negada"
+  "imageUrl": "http://localhost:8080/uploads/imagem.png"
 }
 ```
 
 ---
 
-## 👤 Entidade Usuário
+## 10. Pagamentos
 
-### Estrutura JSON
+### 10.1 Criar Pagamento (Stripe)
+
+**Endpoint**
+
+```
+POST /pagamento/stripe/create
+```
+
+**Body**
 
 ```json
 {
-  "id": 1,
-  "nome": "Deodato Sebastião Luzayadio",
-  "email": "deolastro@gmail.com"
+  "amount": 1000
 }
 ```
 
-> ⚠️ A senha (`senhaHash`) é protegida com `@JsonProperty(WRITE_ONLY)` e **não é devolvida** nas respostas.
-
----
-
-## 🔐 Autenticação
-
-### Login de Usuário
-
-**POST** `/login`
-
-#### Request Body
+**Resposta**
 
 ```json
 {
-  "email": "deolastro@gmail.com",
-  "senha": "123456"
-}
-```
-
-#### Response 200 OK
-
-```json
-{
-  "id": 1,
-  "nome": "Deodato Sebastião Luzayadio",
-  "email": "deolastro@gmail.com",
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
+  "clientSecret": "stripe_secret"
 }
 ```
 
 ---
 
-## ⚙️ Estrutura de Diretórios (Backend)
+## 11. Códigos de Resposta
 
-```
-backend/
- ├─ src/
- │   ├─ main/java/iade/pt/backend/controllers/
- │   │   ├─ ProdutoController.java
- │   │   ├─ UploadController.java
- │   │   └─ UsuarioController.java
- │   ├─ main/java/iade/pt/backend/models/
- │   │   ├─ Produto.java
- │   │   └─ Usuario.java
- │   ├─ main/java/iade/pt/backend/repositories/
- │   │   ├─ ProdutoRepository.java
- │   │   └─ UsuarioRepository.java
- │   └─ main/resources/application.properties
- ├─ uploads/
- └─ pom.xml
-```
+| Código | Significado     |
+| ------ | --------------- |
+| 200    | OK              |
+| 201    | Criado          |
+| 400    | Pedido inválido |
+| 401    | Não autorizado  |
+| 404    | Não encontrado  |
+| 500    | Erro interno    |
 
 ---
 
-## 🧾 Códigos de Status HTTP
-
-| Código                      | Significado                | Exemplo                |
-| --------------------------- | -------------------------- | ---------------------- |
-| `200 OK`                    | Requisição bem-sucedida    | Produto listado        |
-| `201 Created`               | Recurso criado com sucesso | Produto publicado      |
-| `400 Bad Request`           | Erro de validação          | Usuário inexistente    |
-| `404 Not Found`             | Recurso não encontrado     | Produto inexistente    |
-| `500 Internal Server Error` | Erro interno do servidor   | Falha ao salvar imagem |
+Esta documentação descreve os principais endpoints da API Mercado Académico.
+A autenticação é realizada através de JWT e alguns endpoints requerem permissões específicas.
 
 ---
 
-## 🧠 Tecnologias Utilizadas
-
-| Camada             | Tecnologia                         |
-| ------------------ | ---------------------------------- |
-| Backend            | Spring Boot (Java 17)              |
-| Banco de Dados     | MySQL                              |
-| ORM                | JPA / Hibernate                    |
-| Frontend           | Android (Kotlin + Jetpack Compose) |
-| Cliente HTTP       | Retrofit                           |
-| Upload de Arquivos | Multipart via `Spring MVC`         |
-| Serialização JSON  | Gson                               |
-
----
-
-## 📖 Swagger (Documentação Automática)
-
-Para gerar uma interface interativa da API:
-
-### Adicione no `pom.xml`
-
-```xml
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.2.0</version>
-</dependency>
-```
-
-Depois de executar o projeto, aceda a:
-
-```
-http://localhost:8080/swagger-ui.html
-```
-
----
 
