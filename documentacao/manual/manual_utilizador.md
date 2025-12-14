@@ -17,7 +17,7 @@ A aplicação foi desenvolvida para dispositivos **Android**.
 
 Ao abrir a aplicação pela primeira vez, o utilizador pode criar uma nova conta.
 
-![Ecrã de Registo](imagens/registo.png)
+<img src="imagens/registo.png" alt="Página Inicial" width="300"/>
 
 ### Passos para registo:
 1. Selecionar a opção **Criar Conta**;
