@@ -3,6 +3,7 @@ package com.example.frontend.ui.cadastro
 
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image // Import para a imagem
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.frontend.R // Import CRÍTICO para os recursos (R.drawable.logo1)
 import com.example.frontend.ui.theme.FrontendTheme
 import com.example.frontend.ui.theme.Vermelho
@@ -49,8 +51,16 @@ class CadastroActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen() {
-    var nome by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+    val viewModel: CadastroViewModel = viewModel()
+    val state by viewModel.state.collectAsState()
+    val step by viewModel.step.collectAsState()
+    val emailVerificado by viewModel.email.collectAsState()
+
+    // Estados locais
     var email by rememberSaveable { mutableStateOf("") }
+    var token by rememberSaveable { mutableStateOf("") }
+    var nome by rememberSaveable { mutableStateOf("") }
     var telefone by rememberSaveable { mutableStateOf("") }
     var senha by rememberSaveable { mutableStateOf("") }
     var confirmarSenha by rememberSaveable { mutableStateOf("") }
@@ -58,7 +68,7 @@ fun RegisterScreen() {
     var confirmarSenhaVisivel by rememberSaveable { mutableStateOf(false) }
 
     val senhasCoincidem = senha == confirmarSenha
-    val context = LocalContext.current
+    val loading = state is CadastroUiState.Loading
 
     Scaffold(
         topBar = {
@@ -79,141 +89,274 @@ fun RegisterScreen() {
                 .padding(horizontal = 24.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Imagem do Logo
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Logo
             Image(
                 painter = painterResource(id = R.drawable.logo1),
                 contentDescription = "Logo da Aplicação",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp) // Ajuste a altura conforme necessário
-                    .padding(bottom = 24.dp)
+                    .height(100.dp)
+                    .padding(bottom = 16.dp)
             )
 
-            // Título
+            // Título dinâmico por passo
             Text(
-                text = "Crie sua conta",
+                text = when (step) {
+                    1 -> "Verificar e-mail"
+                    2 -> "Confirmar código"
+                    else -> "Criar conta"
+                },
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Normal,
+                fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(24.dp))
 
-            // Campo Nome
-            OutlinedTextField(
-                value = nome,
-                onValueChange = { nome = it },
-                label = { Text("Nome Completo") },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Email
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Telefone
-            OutlinedTextField(
-                value = telefone,
-                onValueChange = { telefone = it },
-                label = { Text("Telefone") },
-                leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Senha
-            OutlinedTextField(
-                value = senha,
-                onValueChange = { senha = it },
-                label = { Text("Senha") },
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    val image = if (senhaVisivel) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                    IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
-                        Icon(image, "Mostrar/Esconder senha")
-                    }
+            Text(
+                text = when (step) {
+                    1 -> "Digite o seu e-mail para enviarmos um código de verificação."
+                    2 -> "Digite o código de 6 dígitos enviado para $emailVerificado."
+                    else -> "Preencha os dados para finalizar a criação da sua conta."
                 },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Confirmar Senha
-            OutlinedTextField(
-                value = confirmarSenha,
-                onValueChange = { confirmarSenha = it },
-                label = { Text("Confirmar Senha") },
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                visualTransformation = if (confirmarSenhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    val image = if (confirmarSenhaVisivel) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                    IconButton(onClick = { confirmarSenhaVisivel = !confirmarSenhaVisivel }) {
-                        Icon(image, "Mostrar/Esconder senha")
-                    }
-                },
-                isError = !senhasCoincidem && confirmarSenha.isNotEmpty(),
-                supportingText = {
-                    if (!senhasCoincidem && confirmarSenha.isNotEmpty()) {
-                        Text(
-                            "As senhas não coincidem",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Botão de Cadastro
-            Button(
-                onClick = {
-                    // TODO: Adicionar lógica de validação de campos e de cadastro
-                },
+            // Indicador simples de progresso
+            LinearProgressIndicator(
+                progress = step / 3f,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Vermelho),
-                enabled = senhasCoincidem && nome.isNotBlank() && email.isNotBlank() && senha.isNotBlank() && confirmarSenha.isNotBlank()
-            ) {
-                Text("CADASTRAR")
-            }
+                    .height(6.dp),
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Link para fazer login
+            when (step) {
+                1 -> {
+                    // PASSO 1: EMAIL
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { viewModel.enviarCodigo(email.trim()) },
+                        enabled = email.isNotBlank() && !loading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Vermelho)
+                    ) {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 3.dp,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        } else {
+                            Text("ENVIAR CÓDIGO")
+                        }
+                    }
+                }
+
+                2 -> {
+                    // PASSO 2: TOKEN
+                    OutlinedTextField(
+                        value = token,
+                        onValueChange = { novo ->
+                            if (novo.length <= 6 && novo.all { it.isDigit() }) {
+                                token = novo
+                            }
+                        },
+                        label = { Text("Código de verificação") },
+                        leadingIcon = { Icon(Icons.Default.VpnKey, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { viewModel.validarCodigo(token) },
+                        enabled = token.length == 6 && !loading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Vermelho)
+                    ) {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 3.dp,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        } else {
+                            Text("VALIDAR CÓDIGO")
+                        }
+                    }
+                }
+
+                3 -> {
+                    // PASSO 3: DADOS FINAIS
+
+                    OutlinedTextField(
+                        value = nome,
+                        onValueChange = { nome = it },
+                        label = { Text("Nome Completo") },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Email verificado: $emailVerificado",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = telefone,
+                        onValueChange = { novo ->
+                            if (novo.length <= 9 && novo.all { it.isDigit() }) {
+                                telefone = novo
+                            }
+                        },
+                        label = { Text("Telefone (9 dígitos)") },
+                        leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        isError = telefone.isNotEmpty() && telefone.length != 9,
+                        supportingText = {
+                            if (telefone.isNotEmpty() && telefone.length != 9) {
+                                Text("Digite um número com 9 dígitos.", color = Color.Red)
+                            }
+                        },
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = senha,
+                        onValueChange = { senha = it },
+                        label = { Text("Senha") },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                        visualTransformation = if (senhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            val image = if (senhaVisivel) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
+                                Icon(image, "Mostrar/Esconder senha")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = confirmarSenha,
+                        onValueChange = { confirmarSenha = it },
+                        label = { Text("Confirmar Senha") },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                        visualTransformation = if (confirmarSenhaVisivel) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            val image = if (confirmarSenhaVisivel) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                            IconButton(onClick = { confirmarSenhaVisivel = !confirmarSenhaVisivel }) {
+                                Icon(image, "Mostrar/Esconder senha")
+                            }
+                        },
+                        isError = !senhasCoincidem && confirmarSenha.isNotEmpty(),
+                        supportingText = {
+                            if (!senhasCoincidem && confirmarSenha.isNotEmpty()) {
+                                Text("As senhas não coincidem", color = MaterialTheme.colorScheme.error)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { viewModel.criarConta(nome, telefone, senha) },
+                        enabled = nome.isNotBlank()
+                                && telefone.length == 9
+                                && senha.isNotBlank()
+                                && senhasCoincidem
+                                && !loading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Vermelho)
+                    ) {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 3.dp,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        } else {
+                            Text("CRIAR CONTA")
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             ClickableText(
                 text = AnnotatedString("Já tem uma conta? Faça login"),
-                onClick = {
-                    (context as? Activity)?.finish()
-                },
+                onClick = { (context as? Activity)?.finish() },
                 style = TextStyle(
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     color = Vermelho
                 )
             )
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+
+    // Tratamento de estados (toasts)
+    LaunchedEffect(state) {
+        when (val currentState = state) {
+            is CadastroUiState.Success -> {
+                Toast.makeText(context, currentState.msg, Toast.LENGTH_LONG).show()
+                if (currentState.final) (context as? Activity)?.finish()
+                viewModel.reset()
+            }
+
+            is CadastroUiState.Error -> {
+                Toast.makeText(context, currentState.msg, Toast.LENGTH_LONG).show()
+                viewModel.reset()
+            }
+
+            else -> {}
+        }
+    }
+
 }
+
 
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable

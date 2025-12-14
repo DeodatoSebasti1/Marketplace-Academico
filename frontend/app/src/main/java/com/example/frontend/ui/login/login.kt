@@ -1,5 +1,4 @@
-// CAMINHO: app/src/main/java/com/example/frontend/ui/login/LoginActivity.kt (A SUA VERSÃO ORIGINAL)
-
+// CAMINHO: app/src/main/java/com/example/frontend/ui/login/LoginActivity.kt
 package com.example.frontend.ui.login
 
 import android.app.Activity
@@ -39,21 +38,28 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.frontend.ui.main.MainActivity
 import com.example.frontend.R
+import com.example.frontend.data.local.SessionManager
+import com.example.frontend.network.RetrofitClient
 import com.example.frontend.ui.cadastro.CadastroActivity
-import com.example.frontend.ui.home.HomeActivity
 import com.example.frontend.ui.recuperacao.RecuperarSenhaActivity
 import com.example.frontend.ui.theme.FrontendTheme
 import com.example.frontend.ui.theme.Vermelho
 
 class LoginActivity : ComponentActivity() {
 
-    // Esta linha daria erro porque a dependência "androidx.activity:activity-compose" está em falta.
     private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Inicializa Retrofit com Interceptor JWT
+        val session = SessionManager(this)
+        RetrofitClient.init(session)
+
+
         setContent {
             FrontendTheme {
                 LoginScreen(viewModel = loginViewModel)
@@ -61,16 +67,18 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    fun navigateToHome(activity: Activity, userName: String, userEmail: String) {
-        val intent = Intent(activity, HomeActivity::class.java).apply {
+    fun navigateToHome(activity: Activity, userId: Long, userName: String, userEmail: String) {
+        val intent = Intent(activity, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("USER_NAME", userName)
             putExtra("USER_EMAIL", userEmail)
         }
+        SessionManager(activity).saveUser(userId, userName, userEmail)
         activity.startActivity(intent)
         activity.finish()
     }
 }
+
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
@@ -79,19 +87,21 @@ fun LoginScreen(viewModel: LoginViewModel) {
     var senhaVisivel by rememberSaveable { mutableStateOf(false) }
 
     val context = LocalContext.current
-    // Esta linha daria erro porque a dependência do ViewModel e do collectAsState não existe.
     val uiState by viewModel.loginUiState.collectAsState()
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is LoginUiState.Success -> {
-                Toast.makeText(context, state.response.mensagem, Toast.LENGTH_SHORT).show()
-                val user = state.response.utilizador
-                if (user != null) {
-                    (context as? LoginActivity)?.navigateToHome(context, user.nome, user.email)
-                } else {
-                    Toast.makeText(context, "Erro: Dados do utilizador não recebidos.", Toast.LENGTH_LONG).show()
-                }
+                val user = state.response
+                Toast.makeText(context, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
+
+                (context as? LoginActivity)?.navigateToHome(
+                    activity = context,
+                    userId = user.id,
+                    userName = user.nome,
+                    userEmail = user.email
+                )
+
                 viewModel.resetState()
             }
             is LoginUiState.Error -> {
@@ -102,7 +112,6 @@ fun LoginScreen(viewModel: LoginViewModel) {
         }
     }
 
-    // ... (O resto do seu código da UI, que estava maioritariamente correto)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -160,7 +169,11 @@ fun LoginScreen(viewModel: LoginViewModel) {
         ClickableText(
             text = AnnotatedString("Esqueceu a sua senha?"),
             onClick = { context.startActivity(Intent(context, RecuperarSenhaActivity::class.java)) },
-            style = TextStyle(fontSize = 14.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.primary),
+            style = TextStyle(
+                fontSize = 14.sp,
+                textAlign = TextAlign.End,
+                color = MaterialTheme.colorScheme.primary
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -177,7 +190,11 @@ fun LoginScreen(viewModel: LoginViewModel) {
             colors = ButtonDefaults.buttonColors(containerColor = Vermelho, contentColor = Color.White)
         ) {
             if (uiState is LoginUiState.Loading) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 3.dp
+                )
             } else {
                 Text("ENTRAR")
             }
@@ -187,7 +204,12 @@ fun LoginScreen(viewModel: LoginViewModel) {
         val annotatedText = buildAnnotatedString {
             append("Ainda não possui uma conta? ")
             pushStringAnnotation(tag = "SignUp", annotation = "SignUp")
-            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
+            withStyle(
+                style = SpanStyle(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            ) {
                 append("Criar conta")
             }
             pop()
@@ -196,7 +218,11 @@ fun LoginScreen(viewModel: LoginViewModel) {
         ClickableText(
             text = annotatedText,
             onClick = { offset ->
-                annotatedText.getStringAnnotations(tag = "SignUp", start = offset, end = offset).firstOrNull()?.let {
+                annotatedText.getStringAnnotations(
+                    tag = "SignUp",
+                    start = offset,
+                    end = offset
+                ).firstOrNull()?.let {
                     context.startActivity(Intent(context, CadastroActivity::class.java))
                 }
             },

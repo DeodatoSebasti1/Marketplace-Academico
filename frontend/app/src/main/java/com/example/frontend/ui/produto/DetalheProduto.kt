@@ -1,76 +1,71 @@
-// CAMINHO: app/src/main/java/com/example/frontend/ui/produto/DetalheProdutoActivity.kt
 package com.example.frontend.ui.produto
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.frontend.R
-import com.example.frontend.ui.mensagens.ListaPropostasActivity
-import com.example.frontend.ui.theme.FrontendTheme
+import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.example.frontend.data.local.SessionManager
+import com.example.frontend.ui.main.MainViewModel
 import com.example.frontend.ui.theme.Vermelho
 
-class DetalheProdutoActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FrontendTheme {
-                ProductDetailScreen()
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
-fun ProductDetailScreen() {
+fun ProductDetailScreen(
+    produtoId: Long,
+    mainViewModel: MainViewModel,
+    navController: NavHostController,
+    viewModel: DetalheProdutoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
+
+    val produtoState by viewModel.produto.collectAsState()
+    val favoriteIds by mainViewModel.favoriteIds.collectAsState()
     val context = LocalContext.current
-    var isFavorite by remember { mutableStateOf(false) }
 
-    // Estado para controlar a visibilidade do modal de proposta
-    var showProposalDialog by remember { mutableStateOf(false) }
+    val session = SessionManager(context)
+    val userId = session.getUserId()
 
-    // Renderiza o modal de proposta apenas se o estado for verdadeiro
-    if (showProposalDialog) {
-        ProposalDialog(
-            productPrice = "€ 29,90", // Em um app real, este valor viria do produto
-            onDismiss = { showProposalDialog = false },
-            onConfirm = { proposalValue ->
-                // TODO: Lógica para enviar a proposta para o back-end com o `proposalValue`
-                showProposalDialog = false // Fecha o modal após a confirmação
-                // Opcional: Navegar para a tela de propostas
-                context.startActivity(Intent(context, ListaPropostasActivity::class.java))
-            }
-        )
+    val isOwner by viewModel.isOwner.collectAsState()
+
+    val isFavorite by remember(favoriteIds) {
+        derivedStateOf { favoriteIds.contains(produtoId) }
+    }
+
+    var showFullImage by remember { mutableStateOf(false) }
+    var selectedImage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(produtoId) {
+        viewModel.getProdutoById(produtoId, userId)
     }
 
     Scaffold(
@@ -78,157 +73,234 @@ fun ProductDetailScreen() {
             TopAppBar(
                 title = { Text("Detalhes", color = Color.White) },
                 navigationIcon = {
-                    IconButton(onClick = { (context as? Activity)?.finish() }) {
-                        Icon(Icons.Default.ArrowBack, "Voltar", tint = Color.White)
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, null, tint = Color.White)
                     }
                 },
                 actions = {
-                    IconButton(onClick = { isFavorite = !isFavorite }) {
+                    IconButton(
+                        onClick = {
+                            produtoState?.let { produto ->
+                                mainViewModel.toggleFavorite(userId, produto)
+                            }
+                        }
+                    ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = "Favoritar",
-                            tint = if (isFavorite) Color.White else Color.White.copy(alpha = 0.8f)
+                            tint = if (isFavorite) Color.Red else Color.White,
+                            contentDescription = null
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Vermelho)
             )
-        },
-        bottomBar = {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shadowElevation = 8.dp
+        }
+    ) { padding ->
+
+        if (produtoState == null) {
+            Box(
+                Modifier.fillMaxSize(),
+                Alignment.Center
             ) {
+                CircularProgressIndicator(color = Vermelho)
+            }
+            return@Scaffold
+        }
+
+        val produto = produtoState!!
+
+        val imagens = remember(produto.imagens) {
+            (produto.imagens ?: "")
+                .split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+        }
+
+        val pagerState = rememberPagerState(
+            pageCount = { if (imagens.isEmpty()) 1 else imagens.size }
+        )
+
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+        ) {
+
+            // CARROSSEL
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) { page ->
+                val fileName = imagens.getOrNull(page)
+                val imgUrl = fileName?.let { "http://10.0.2.2:8080/uploads/$it" }
+
+                Image(
+                    painter = rememberAsyncImagePainter(imgUrl),
+                    contentDescription = produto.titulo ?: "",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            selectedImage = imgUrl
+                            showFullImage = true
+                        }
+                    ,
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            Text(
+                produto.titulo ?: "",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(12.dp)
+            )
+
+            Text(
+                "€ ${produto.preco}",
+                color = Vermelho,
+                fontWeight = FontWeight.Bold,
+                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+
+            Divider(Modifier.padding(vertical = 12.dp))
+
+            // VENDEDOR
+            val vendedor = produto.usuario
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(12.dp)
+            ) {
+                val fotoPerfilUrl = vendedor?.fotoPerfil?.let {
+                    "http://10.0.2.2:8080/uploads/$it"
+                }
+
+                Image(
+                    painter = rememberAsyncImagePainter(fotoPerfilUrl),
+                    contentDescription = "Foto usuário",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = vendedor?.nome ?: "Vendedor",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+
+                    Text(
+                        text = "Vendedor",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                if (isOwner) {
+                    Button(
+                        onClick = {
+                            val intent = Intent(context, EditarProdutoActivity::class.java)
+                            intent.putExtra("PRODUTO_ID", produto.idProduto)
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Icon(Icons.Default.Edit, null)
+                        Text(" Editar")
+                    }
+                }
+            }
+
+            Divider(Modifier.padding(vertical = 12.dp))
+
+            Text(
+                "Descrição",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(12.dp)
+            )
+
+            Text(
+                produto.descricao ?: "Sem descrição",
+                modifier = Modifier.padding(12.dp)
+            )
+
+            Spacer(Modifier.height(20.dp))
+
+            // BOTÕES DE PROPOSTA E COMPRA
+            if (!isOwner) {
                 Row(
                     modifier = Modifier
-                        .background(Color.White)
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Botão para abrir o modal de proposta
-                    OutlinedButton(
-                        onClick = { showProposalDialog = true },
-                        modifier = Modifier.weight(1f).height(48.dp)
-                    ) {
-                        Text("Fazer Proposta")
-                    }
 
-                    // Botão de compra direta
+                    //PROPOSTA
                     Button(
-                        onClick = { /* TODO: Lógica de compra (checkout) */ },
-                        modifier = Modifier.weight(1f).height(48.dp),
+                        onClick = {
+                            navController.navigate("enviarProposta/${produto.idProduto}/${produto.usuario?.id}")
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Vermelho)
                     ) {
+                        Icon(Icons.Default.Message, null)
+                        Text(" Fazer Proposta")
+                    }
+
+
+                    //COMPRAR
+                    Button(
+                        onClick = {
+                            val safeTitulo = Uri.encode(produto.titulo ?: "")
+                            navController.navigate("checkout/${produto.idProduto}/$safeTitulo/${produto.preco}")
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
                         Text("Comprar")
                     }
                 }
             }
         }
-    ) { paddingValues ->
-        // Conteúdo da tela (imagens, descrição)
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(Color.White)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.produto_exemplo),
-                contentDescription = "Imagem do Produto",
-                modifier = Modifier.fillMaxWidth().height(300.dp),
-                contentScale = ContentScale.Crop
-            )
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Produto Incrível", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("€ 29,90", style = MaterialTheme.typography.headlineSmall, color = Vermelho, fontWeight = FontWeight.SemiBold)
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Descrição do Produto", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Aqui entra uma descrição detalhada e completa sobre o produto, falando sobre suas qualidades, materiais, dimensões e qualquer outra informação relevante...",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Divider(modifier = Modifier.padding(vertical = 24.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+
+        // FULLSCREEN IMAGE
+        if (showFullImage) {
+            Dialog(onDismissRequest = { showFullImage = false }) {
+                var zoom by remember { mutableStateOf(1f) }
+
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
+                        .pointerInput(Unit) {
+                            detectTransformGestures { _, _, scale, _ ->
+                                zoom = (zoom * scale).coerceIn(1f, 4f)
+                            }
+                        }
+                ) {
                     Image(
-                        painter = painterResource(id = R.drawable.produto_exemplo),
-                        contentDescription = "Foto do Vendedor",
-                        modifier = Modifier.size(50.dp).clip(CircleShape)
+                        painter = rememberAsyncImagePainter(selectedImage),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .graphicsLayer(scaleX = zoom, scaleY = zoom)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text("Vendido por", fontSize = 14.sp, color = Color.Gray)
-                        Text("Nome do Vendedor", fontWeight = FontWeight.SemiBold)
-                    }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    }
-}
-
-// Composable para o Modal (AlertDialog) de Proposta
-@Composable
-fun ProposalDialog(
-    productPrice: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    var proposalValue by rememberSaveable { mutableStateOf("") }
-    val isProposalValid = proposalValue.isNotBlank() && proposalValue.toDoubleOrNull() ?: 0.0 > 0.0
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Fazer uma Proposta") },
-        text = {
-            Column {
-                Text(
-                    "Preço Original: $productPrice",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = proposalValue,
-                    onValueChange = { proposalValue = it },
-                    label = { Text("Sua oferta (€)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(proposalValue) },
-                enabled = isProposalValid
-            ) {
-                Text("Enviar Proposta")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
-}
-
-// Previews para visualização no Android Studio
-@Preview(showBackground = true, device = "id:pixel_5")
-@Composable
-fun ProductDetailScreenPreview() {
-    FrontendTheme {
-        ProductDetailScreen()
-    }
-}
-
-@Preview
-@Composable
-fun ProposalDialogPreview() {
-    FrontendTheme {
-        ProposalDialog(productPrice = "€ 29,90", onDismiss = {}, onConfirm = {})
     }
 }

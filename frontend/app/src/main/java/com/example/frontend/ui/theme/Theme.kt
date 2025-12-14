@@ -25,18 +25,16 @@ private val LightColorScheme = lightColorScheme(
     background = Color.White,        // Cor de fundo principal dos ecrãs
     surface = Color.White,           // Cor da superfície de componentes como Cards
 
-    // Cores para texto e ícones sobre o fundo branco
     onBackground = Color.Black,      // Cor do texto sobre o fundo branco
     onSurface = Color.Black          // Cor do texto sobre superfícies brancas
 )
 
 @Composable
 fun FrontendTheme(
-    // darkTheme: Boolean = isSystemInDarkTheme(), // <- Removido para forçar tema claro
     dynamicColor: Boolean = false, // <- Desativado para usar sempre nosso tema
     content: @Composable () -> Unit
 ) {
-    // 2. LÓGICA SIMPLIFICADA PARA USAR SEMPRE O TEMA CLARO
+    // LÓGICA USAR SEMPRE O TEMA CLARO
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current

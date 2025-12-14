@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.frontend"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.frontend"
@@ -65,6 +65,12 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.kotlinx.coroutines.android)
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.litert.support.api)
+
 
     // Testes
     testImplementation(libs.junit)
@@ -74,4 +80,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Necessário para o rememberLauncherForActivityResult (Activity Results API)
+    implementation("androidx.activity:activity-ktx:1.9.3")
+
+    //carrossel
+    implementation("com.google.accompanist:accompanist-pager:0.34.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
+    //stripe
+    implementation("com.stripe:stripe-android:20.40.0")
 }

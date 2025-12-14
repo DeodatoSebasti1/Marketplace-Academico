@@ -1,24 +1,26 @@
-// CAMINHO: app/src/main/java/com/example/frontend/ui/home/HomeActivity.kt
 package com.example.frontend.ui.home
 
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,101 +30,250 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.example.frontend.R
-import com.example.frontend.ui.mensagens.ListaPropostasActivity
-import com.example.frontend.ui.perfil.PerfilActivity
-import com.example.frontend.ui.produto.DetalheProdutoActivity
-import com.example.frontend.ui.produto.FavoritosActivity
-import com.example.frontend.ui.produto.PostarProdutoActivity
-import com.example.frontend.ui.theme.FrontendTheme
+import com.example.frontend.model.ProdutoResponse
+import com.example.frontend.ui.main.MainViewModel
 import com.example.frontend.ui.theme.Vermelho
+import kotlinx.coroutines.delay
 
-class HomeActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Recebemos os dados do utilizador vindos da LoginActivity
-        val userName = intent.getStringExtra("USER_NAME") ?: "Nome Padrão"
-        val userEmail = intent.getStringExtra("USER_EMAIL") ?: "email@padrão.com"
-
-        setContent {
-            FrontendTheme {
-                // Passamos os dados para a tela principal
-                HomeScreen(userName = userName, userEmail = userEmail)
-            }
-        }
-    }
+sealed class ProdutosUiState {
+    object Loading : ProdutosUiState()
+    data class Success(val produtos: List<ProdutoResponse>) : ProdutosUiState()
+    data class Error(val message: String) : ProdutosUiState()
 }
 
-// Estruturas de dados (sem alterações)
-data class Product(val id: Int, val name: String, val price: String, val imageRes: Int)
-
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun HomeScreen(userName: String, userEmail: String) { // Recebe os dados
+fun HomeScreen(
+    userId: Long,
+    userName: String,
+    userEmail: String,
+    mainViewModel: MainViewModel,
+    navController: NavHostController
+)
+ {
     val context = LocalContext.current
-    val products = List(20) {
-        Product(
-            it,
-            "Produto Incrível ${it + 1}",
-            "€ ${String.format("%.2f", (it + 1) * 29.90)}",
-            R.drawable.produto_exemplo
-        )
+
+    // ViewModel apenas para produtos
+    val homeViewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
+    val uiState by homeViewModel.uiState.collectAsState()
+    val favoriteIds by mainViewModel.favoriteIds.collectAsState()
+
+    var searchQuery by remember { mutableStateOf("") }
+    var categoriaSelecionada by remember { mutableStateOf("Todos") }
+    var sortMenuVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        homeViewModel.carregarProdutos()
+        mainViewModel.syncFavoritosFromApi(userId)
+
+        while (true) {
+            delay(15000)
+            homeViewModel.carregarProdutos()
+            mainViewModel.syncFavoritosFromApi(userId)
+        }
     }
 
-    Scaffold(
-        topBar = { MarketplaceTopBar() },
-        bottomBar = { MarketplaceBottomBar(userName = userName, userEmail = userEmail) }, // Passa os dados
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { context.startActivity(Intent(context, PostarProdutoActivity::class.java)) },
-                shape = CircleShape,
-                containerColor = Vermelho,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Postar Produto")
+
+    Column(Modifier.fillMaxSize()) {
+
+        MarketplaceTopBar(
+            searchQuery = searchQuery,
+            onSearchChange = { searchQuery = it },
+            menuExpanded = sortMenuVisible,
+            onMenuExpandChange = { sortMenuVisible = it },
+            onSortClick = { homeViewModel.ordenarPor(it) }
+        )
+
+        CategoriasRow { categoriaSelecionada = it }
+
+        AnimatedContent(
+            targetState = uiState,
+            transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(250)) },
+            modifier = Modifier.fillMaxSize()
+        ) { state ->
+
+            when (state) {
+                is ProdutosUiState.Loading -> Box(
+                    Modifier.fillMaxSize(),
+                    Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Vermelho)
+                }
+
+                is ProdutosUiState.Error -> Box(
+                    Modifier.fillMaxSize(),
+                    Alignment.Center
+                ) {
+                    Text(text = state.message, color = Vermelho)
+                }
+
+                is ProdutosUiState.Success -> {
+
+                    var produtos = state.produtos
+
+                    //remover o produto depois de vendido
+                    produtos = produtos.filter { it.comprador == null }
+
+
+                    produtos = when (homeViewModel.sortMode) {
+                        "ASC" -> produtos.sortedBy { it.preco }
+                        "DESC" -> produtos.sortedByDescending { it.preco }
+                        "NEW" -> produtos.sortedByDescending { it.idProduto }
+                        "OLD" -> produtos.sortedBy { it.idProduto }
+                        else -> produtos
+                    }
+
+                    produtos = produtos.filter {
+                        (it.titulo ?: "").contains(searchQuery, ignoreCase = true)
+                    }
+
+                    if (categoriaSelecionada != "Todos")
+                        produtos = produtos.filter { it.categoria?.nome == categoriaSelecionada }
+
+
+                    if (produtos.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), Alignment.Center) {
+                            Text("Nenhum produto encontrado")
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(produtos) { produto ->
+                                ProductCard(
+                                    product = produto,
+                                    isFavorite = favoriteIds.contains(produto.idProduto),
+                                    onFavoriteToggle = {
+                                        mainViewModel.toggleFavorite(userId, produto)
+                                    },
+                                    onClick = {
+                                        navController.navigate("detalheProduto/${produto.idProduto}")
+                                    }
+
+                                )
+                            }
+                        }
+                    }
+                }
             }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            ProductGrid(products = products)
         }
     }
 }
 
+// ------------------- COMPONENTES --------------------
+
 @Composable
-fun MarketplaceTopBar() {
-    var searchQuery by remember { mutableStateOf("") }
-    Surface(modifier = Modifier.fillMaxWidth(), color = Vermelho, shadowElevation = 4.dp) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Image(painter = painterResource(id = R.drawable.logo2), contentDescription = "Logo", modifier = Modifier.height(30.dp))
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+fun MarketplaceTopBar(
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    menuExpanded: Boolean,
+    onMenuExpandChange: (Boolean) -> Unit,
+    onSortClick: (String) -> Unit
+) {
+    Surface(color = Vermelho) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+
+            Image(
+                painter = painterResource(id = R.drawable.logo2),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(40.dp)
+            )
+
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Pesquisar produtos...", color = Color.Gray) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Ícone de Pesquisa", tint = Color.Gray) },
-                shape = RoundedCornerShape(30.dp),
+                onValueChange = onSearchChange,
+                singleLine = true,
+                placeholder = { Text("Pesquisar...", color = Color.Gray) },
+                leadingIcon = { Icon(Icons.Rounded.Search, null, tint = Vermelho) },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
+                    cursorColor = Vermelho,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                ),
+            )
+
+            Box {
+                IconButton(onClick = { onMenuExpandChange(true) }) {
+                    Icon(
+                        Icons.Rounded.FilterList,
+                        contentDescription = "Ordenar",
+                        tint = Color.White
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { onMenuExpandChange(false) }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Maior preço") },
+                        onClick = { onSortClick("DESC"); onMenuExpandChange(false) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Menor preço") },
+                        onClick = { onSortClick("ASC"); onMenuExpandChange(false) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Novos") },
+                        onClick = { onSortClick("NEW"); onMenuExpandChange(false) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Antigos") },
+                        onClick = { onSortClick("OLD"); onMenuExpandChange(false) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoriasRow(onSelected: (String) -> Unit) {
+    val categorias =
+        listOf("Todos", "Livros", "Tecnologia", "Material Escolar", "Serviços", "Outros")
+    var selected by remember { mutableStateOf("Todos") }
+
+    LazyRow(
+        Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(categorias.size) { i ->
+            AssistChip(
+                onClick = {
+                    selected = categorias[i]
+                    onSelected(categorias[i])
+                },
+                label = { Text(categorias[i]) },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = if (selected == categorias[i]) Vermelho else Color.White,
+                    labelColor = if (selected == categorias[i]) Color.White else Vermelho
                 )
             )
         }
@@ -130,86 +281,67 @@ fun MarketplaceTopBar() {
 }
 
 @Composable
-fun ProductGrid(products: List<Product>) {
-    val context = LocalContext.current
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(products) { product ->
-            ProductCard(product = product, onClick = {
-                context.startActivity(Intent(context, DetalheProdutoActivity::class.java))
-            })
-        }
-    }
-}
+fun ProductCard(
+    product: ProdutoResponse,
+    isFavorite: Boolean,
+    onFavoriteToggle: () -> Unit,
+    onClick: () -> Unit
+) {
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProductCard(product: Product, onClick: () -> Unit) {
+    val primeiraImagem = product.imagens
+        ?.split(",")
+        ?.firstOrNull()
+        ?.trim()
+
+    val imageUrl = primeiraImagem?.let { "http://10.0.2.2:8080/uploads/$it" }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        onClick = onClick
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column {
-            Image(
-                painter = painterResource(id = product.imageRes),
-                contentDescription = product.name,
-                modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = product.price, color = Vermelho, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+        Box {
+            Column {
+
+                Image(
+                    painter = rememberAsyncImagePainter(model = imageUrl),
+                    contentDescription = product.titulo,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+                Column(Modifier.padding(10.dp)) {
+                    Text(
+                        product.titulo ?: "",
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        "€ ${String.format("%.2f", product.preco)}",
+                        color = Vermelho,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = { onFavoriteToggle() },
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (isFavorite) Vermelho else Color.White
+                )
             }
         }
-    }
-}
-
-// BARRA DE NAVEGAÇÃO ATUALIZADA
-@Composable
-fun MarketplaceBottomBar(userName: String, userEmail: String) { // Recebe os dados
-    val context = LocalContext.current
-    NavigationBar(containerColor = Vermelho, contentColor = Color.White, modifier = Modifier.height(80.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            NavigationBarItem(selected = true, onClick = {}, icon = { Icon(Icons.Filled.Home, "Home") }, label = { Text("Home") }, colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White, unselectedIconColor = Color.White.copy(alpha = 0.6f), selectedTextColor = Color.White, unselectedTextColor = Color.White.copy(alpha = 0.6f), indicatorColor = Color.White.copy(alpha = 0.15f)))
-            NavigationBarItem(selected = false, onClick = { context.startActivity(Intent(context, FavoritosActivity::class.java)) }, icon = { Icon(Icons.Filled.Favorite, "Favoritos") }, label = { Text("Favoritos") }, colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White, unselectedIconColor = Color.White.copy(alpha = 0.6f), selectedTextColor = Color.White, unselectedTextColor = Color.White.copy(alpha = 0.6f), indicatorColor = Color.White.copy(alpha = 0.15f)))
-            Spacer(modifier = Modifier.width(50.dp))
-            NavigationBarItem(selected = false, onClick = { context.startActivity(Intent(context, ListaPropostasActivity::class.java)) }, icon = { Icon(Icons.Filled.Email, "Mensagens") }, label = { Text("Mensagens") }, colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White, unselectedIconColor = Color.White.copy(alpha = 0.6f), selectedTextColor = Color.White, unselectedTextColor = Color.White.copy(alpha = 0.6f), indicatorColor = Color.White.copy(alpha = 0.15f)))
-
-            // Item de Perfil MODIFICADO
-            NavigationBarItem(
-                selected = false,
-                onClick = {
-                    val intent = Intent(context, PerfilActivity::class.java).apply {
-                        putExtra("USER_NAME", userName)
-                        putExtra("USER_EMAIL", userEmail)
-                    }
-                    context.startActivity(intent)
-                },
-                icon = { Icon(Icons.Filled.Person, "Perfil") },
-                label = { Text("Perfil") },
-                colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White, unselectedIconColor = Color.White.copy(alpha = 0.6f), selectedTextColor = Color.White, unselectedTextColor = Color.White.copy(alpha = 0.6f), indicatorColor = Color.White.copy(alpha = 0.15f))
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, device = "id:pixel_5")
-@Composable
-fun HomeScreenPreview() {
-    FrontendTheme {
-        HomeScreen(userName = "Preview User", userEmail = "preview@email.com")
     }
 }
