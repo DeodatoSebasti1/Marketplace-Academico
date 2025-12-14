@@ -1,6 +1,6 @@
-# 📱 Mercado Académico
+# Mercado Académico
 
-🎓 **Universidade Europeia – IADE**  
+**Universidade Europeia – IADE**  
 Faculdade de Engenharia  
 Licenciatura em Engenharia Informática  
 
@@ -10,7 +10,7 @@ Licenciatura em Engenharia Informática
 
 ---
 
-## 🧑‍💻 Grupo D01-G11
+## Grupo D01-G11
 
 - **Deodato Sebastião Luzayadio**  
 - **Jeovani António**  
@@ -21,7 +21,7 @@ Ultima Atualização do Relatorio: **14 dezembro 2025**
 
 ---
 
-## 🔗Ligações Importantes
+## Ligações Importantes
 
 - **Figma (Protótipo):**  
   https://www.figma.com/proto/jAdwZAnjQbi05DygAsjtz5/PROTOTIPO-MERCADO-ACADEMICO?node-id=0-1&t=SjjzxkPePQZK1Gzl-1  
@@ -100,7 +100,7 @@ A aplicação destina-se principalmente a:
 
 ---
 
-## 🔍 Pesquisa de Mercado
+## Pesquisa de Mercado
 
 Foram analisadas aplicações de marketplace amplamente utilizadas:
 
@@ -116,7 +116,7 @@ O **Marketplace Académico** diferencia-se por ser restrito à comunidade univer
 
 ---
 
-## 🧪 Guiões de Teste 
+## Guiões de Teste 
 
 ### UC1 – Criar Anúncio e Contactar Vendedor
 
@@ -159,7 +159,7 @@ Anúncio atualizado e posteriormente removido do feed.
 
 ---
 
-## ⚙️ Descrição da Solução
+## Descrição da Solução
 
 ### i. Descrição Geral
 
@@ -214,7 +214,7 @@ Arquitetura cliente-servidor baseada em API REST, separando claramente frontend,
 
 ---
 
-## 🧩 Conclusão
+## Conclusão
 
 O **Marketplace Académico** apresenta uma solução moderna, segura e eficiente para a compra e venda de produtos e serviços no contexto universitário.
 
@@ -222,7 +222,7 @@ O projeto integra tecnologias atuais, respeita boas práticas de engenharia de s
 
 ---
 
-## 📚 Referências
+## Referências
 
 - Android Developers. (2025). *Official Documentation*. Google.  
   https://developer.android.com/docs  
@@ -239,7 +239,7 @@ O projeto integra tecnologias atuais, respeita boas práticas de engenharia de s
 
 ---
 
-## 🧾 Nota Final
+## Nota Final
 
 Este documento em **Markdown** representa a versão digital do relatório académico.  
 A versão **PDF** deve ser gerada a partir deste conteúdo e submetida no **Canvas**, conforme as instruções do docente.
